@@ -1,0 +1,313 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense_tracker/data/categories.dart';
+import 'package:expense_tracker/screens/update_expense.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+class ExpenseDetails extends StatefulWidget {
+  const ExpenseDetails({super.key, required this.expenseDetails});
+  final QueryDocumentSnapshot<Map<String, dynamic>> expenseDetails;
+
+  @override
+  State<ExpenseDetails> createState() => _ExpenseDetailsState();
+}
+
+class _ExpenseDetailsState extends State<ExpenseDetails> {
+  final loggedUser = FirebaseAuth.instance.currentUser;
+  Future<String> _getAddedBy(String id) async {
+    final userDoc =
+        await FirebaseFirestore.instance.collection('users').doc(id).get();
+    return userDoc.data()!['name'];
+  }
+
+  IconData? getCategoryIcon(String categoryName) {
+    for (var category in expenseCategories) {
+      if (category.name == categoryName) {
+        return category.icon;
+      }
+    }
+    return null;
+  }
+
+  Color? getCategoryColor(String categoryName) {
+    for (var category in expenseCategories) {
+      if (category.name == categoryName) {
+        return category.color;
+      }
+    }
+    return Colors.grey;
+  }
+
+  void _showConfirmDeleteDialog(String id) {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      showCupertinoDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text('Confirm Dialog'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Are you sure want to delete this expense'),
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Cancel'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () {
+                        _deleteExpense(id);
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Conform'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            title: Text('Confirm Dialog'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('Are you sure want to delete this expense'),
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Cancel'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () {
+                        _deleteExpense(id);
+                        Navigator.of(context).pop();
+                      },
+                      child: Text('Conform'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  void _deleteExpense(String id) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('personalExpenses')
+          .doc(id)
+          .delete();
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      setState(() {});
+    }
+  }
+
+  void _showUpdateExpenseDialog(String id) {
+    showModalBottomSheet(
+      useSafeArea: true,
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return UpdateExpense(expenseId: id, identifier: 'PERSONAL');
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = widget.expenseDetails.data();
+
+    final title = data['title'] ?? '';
+    final amount = data['amount'] ?? 0;
+    final description = data['description'] ?? '';
+    final category = data['category'] ?? 'Uncategorized';
+    final rawDate = data['date'] as Timestamp?;
+    final formattedDate =
+        rawDate != null
+            ? DateFormat('MMMM d, yyyy').format(rawDate.toDate())
+            : 'Unknown Date';
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Expense Details')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// Title & Amount
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Text(
+                    'Rs. $amount',
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: Colors.green[700],
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              if (description.isNotEmpty)
+                Text(description, style: Theme.of(context).textTheme.bodyLarge),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today_rounded, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    formattedDate,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Column(
+                children: [
+                  Chip(
+                    avatar: Icon(getCategoryIcon(category)),
+                    label: Text(category),
+                    backgroundColor: Colors.blue.shade50,
+                  ),
+                  Chip(
+                    avatar: const Icon(Icons.person),
+                    label: FutureBuilder<Object>(
+                      future: _getAddedBy(data['userId']),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text('Loading added by...');
+                        } else if (snapshot.hasError) {
+                          return const Text('Error loading user');
+                        } else if (!snapshot.hasData || snapshot.data == null) {
+                          return const Text('Unknown user');
+                        }
+
+                        final userName = snapshot.data!;
+                        return Text(
+                          'Added by: $userName',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(fontWeight: FontWeight.w500),
+                        );
+                      },
+                    ),
+                    backgroundColor: Colors.green.shade50,
+                  ),
+                ],
+              ),
+              SizedBox(height: 30),
+              if (data['userId'] == loggedUser!.uid && data['groupId'] == null)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _showUpdateExpenseDialog(widget.expenseDetails.id);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFEB50A8).withAlpha(220),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.update),
+                            SizedBox(width: 10),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                _showUpdateExpenseDialog(
+                                  widget.expenseDetails.id,
+                                );
+                              },
+                              style: TextButton.styleFrom(),
+                              child: Text(
+                                'Update',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () {
+                        _showConfirmDeleteDialog(widget.expenseDetails.id);
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFEB50A8).withAlpha(220),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete),
+                            SizedBox(width: 10),
+                            TextButton(
+                              onPressed: () {
+                                _showConfirmDeleteDialog(
+                                  widget.expenseDetails.id,
+                                );
+                              },
+                              style: TextButton.styleFrom(),
+                              child: Text(
+                                'Delete',
+                                style: TextStyle(color: Colors.black),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
