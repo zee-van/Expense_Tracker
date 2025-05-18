@@ -1,12 +1,7 @@
-// import 'package:flutter/material.dart';
+import 'package:expense_tracker/providers/services/theme_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:expense_tracker/model/theme_model.dart';
 
-// class ThemeProvider with ChangeNotifier {
-//   bool _isDarkMode = false;
-
-//   bool get isDarkMode => _isDarkMode;
-// // 
-//   void toggleTheme() {
-//     _isDarkMode = !_isDarkMode;
-//     notifyListeners();
-//   }
-// }
+final themeProvider = ChangeNotifierProvider<ThemeProvider>((ref) {
+  return ThemeProvider(AppTheme.lightMode);
+});

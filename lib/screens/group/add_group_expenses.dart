@@ -1,24 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expense_tracker/data/categories.dart';
+import 'package:expense_tracker/providers/categries_colors_icons.dart';
 import 'package:expense_tracker/screens/category_bar_chart.dart';
 import 'package:expense_tracker/screens/expense_details.dart';
 import 'package:expense_tracker/screens/monthly_expenses_filter.dart';
-import 'package:expense_tracker/screens/personal/add_new_persoanl_expense.dart';
+import 'package:expense_tracker/screens/group/add_new_group_expense.dart';
 import 'package:expense_tracker/screens/update_expense.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class AddGroupExpensesScreen extends StatefulWidget {
+class AddGroupExpensesScreen extends ConsumerStatefulWidget {
   const AddGroupExpensesScreen({super.key, required this.groupDetails});
   final QueryDocumentSnapshot<Map<String, dynamic>> groupDetails;
 
   @override
-  State<AddGroupExpensesScreen> createState() => _AddGroupExpensesScreenState();
+  ConsumerState<AddGroupExpensesScreen> createState() =>
+      _AddGroupExpensesScreenState();
 }
 
-class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
+class _AddGroupExpensesScreenState
+    extends ConsumerState<AddGroupExpensesScreen> {
   final loggedUser = FirebaseAuth.instance.currentUser;
 
   bool _isChart = true;
@@ -28,10 +32,7 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
       context: context,
       isScrollControlled: true,
       builder: (ctx) {
-        return AddNewPersoanlExpense(
-          identifier: 'GROUP',
-          groupId: widget.groupDetails.id,
-        );
+        return AddNewGroupExpense(groupId: widget.groupDetails.id);
       },
     );
   }
@@ -69,68 +70,35 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
                       style: TextStyle(fontSize: 20),
                     ),
                     SizedBox(height: 30),
-                    InkWell(
+                    ElevatedButtonWidget(
                       onTap: () {
                         Navigator.of(context).pop();
                         _showUpdateExpenseDialog(expense.id);
                       },
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFEB50A8).withAlpha(220),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.update),
-                            SizedBox(width: 10),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                _showUpdateExpenseDialog(expense.id);
-                              },
-                              style: TextButton.styleFrom(),
-                              child: Text(
-                                'Update',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
-                        ),
+                      label: Row(
+                        children: [
+                          SizedBox(width: 20),
+                          Icon(Icons.update, color: Colors.white, size: 25),
+                          SizedBox(width: 10),
+                          Text('Update', style: TextStyle(color: Colors.black)),
+                        ],
                       ),
                     ),
-                    SizedBox(height: 5),
-                    InkWell(
+                    ElevatedButtonWidget(
                       onTap: () {
                         Navigator.of(context).pop();
                         _showConfirmDeleteDialog(expense.id);
                       },
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFEB50A8).withAlpha(220),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete),
-                            SizedBox(width: 10),
-                            TextButton(
-                              onPressed: () {
-                                _showConfirmDeleteDialog(expense.id);
-                              },
-                              style: TextButton.styleFrom(),
-                              child: Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
-                        ),
+                      label: Row(
+                        children: [
+                          SizedBox(width: 20),
+                          Icon(Icons.delete, color: Colors.white, size: 25),
+                          SizedBox(width: 10),
+                          Text('Delete', style: TextStyle(color: Colors.black)),
+                        ],
                       ),
                     ),
+
                     SizedBox(height: 30),
                   ],
                 ),
@@ -148,26 +116,28 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
         context: context,
         builder: (ctx) {
           return AlertDialog(
-            title: Text('Confirm Dialog'),
+            title: Text('Conform Dialog'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('Are you sure want to delete this expense'),
                 SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () {
+                    TextButtonWidget(
+                      onTap: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel'),
+                      label: Text('Cancel'),
                     ),
-                    OutlinedButton(
-                      onPressed: () {
+                    SizedBox(width: 10),
+                    OutlinedButtonWidget(
+                      onTap: () {
                         _deleteExpense(id);
                         Navigator.of(context).pop();
                       },
-                      child: Text('Conform'),
+                      label: Text('Conform'),
                     ),
                   ],
                 ),
@@ -181,26 +151,28 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
         context: context,
         builder: (ctx) {
           return AlertDialog(
-            title: Text('Confirm Dialog'),
+            title: Text('Conform Dialog'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('Are you sure want to delete this expense'),
                 SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () {
+                    TextButtonWidget(
+                      onTap: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel'),
+                      label: Text('Cancel'),
                     ),
-                    OutlinedButton(
-                      onPressed: () {
+                    SizedBox(width: 10),
+                    OutlinedButtonWidget(
+                      onTap: () {
                         _deleteExpense(id);
                         Navigator.of(context).pop();
                       },
-                      child: Text('Conform'),
+                      label: Text('Conform'),
                     ),
                   ],
                 ),
@@ -247,24 +219,6 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
     }
   }
 
-  IconData? getCategoryIcon(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.icon;
-      }
-    }
-    return null;
-  }
-
-  Color? getCategoryColor(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.color;
-      }
-    }
-    return Colors.grey;
-  }
-
   Future<String> _getUserFirstNameCharacter(String userId) async {
     String charName = '';
     try {
@@ -282,6 +236,7 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryServices = ref.watch(categoryServiceProvider);
     return Scaffold(
       appBar: AppBar(title: Text(widget.groupDetails['groupName'])),
       body: StreamBuilder(
@@ -327,7 +282,6 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
                 width: double.infinity,
                 padding: EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: Colors.white,
                   borderRadius: BorderRadius.circular(8.0),
                   boxShadow: [
                     BoxShadow(
@@ -349,7 +303,6 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
                         vertical: 24,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
@@ -518,11 +471,15 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
                         return Container(
                           margin: EdgeInsets.only(top: 5),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.primary.withAlpha(30),
                             borderRadius: BorderRadius.circular(8.0),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withAlpha(60),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(30),
                                 spreadRadius: 2,
                                 blurRadius: 5,
                                 offset: Offset(0, 3),
@@ -546,7 +503,7 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
                         myExpense.data()['userId'] != loggedUser!.uid
                             ? LinearGradient(
                               colors: [
-                                Colors.red.withAlpha(120),
+                                Colors.red.withAlpha(20),
                                 Colors.red.withAlpha(80),
                               ],
                               begin: Alignment.topLeft,
@@ -554,8 +511,8 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
                             )
                             : LinearGradient(
                               colors: [
-                                Color(0xFFEB50A8).withAlpha(120),
                                 Color(0xFFEB50A8).withAlpha(80),
+                                Color(0xFFEB50A8).withAlpha(20),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -573,8 +530,12 @@ class _AddGroupExpensesScreenState extends State<AddGroupExpensesScreen> {
                     },
                     leading: CircleAvatar(
                       child: Icon(
-                        getCategoryIcon(myExpense.data()['category']),
-                        color: getCategoryColor(myExpense.data()['category']),
+                        categoryServices.getCategoryIcon(
+                          myExpense.data()['category'],
+                        ),
+                        color: categoryServices.getCategoryColor(
+                          myExpense.data()['category'],
+                        ),
                       ),
                     ),
                     title: Text(myExpense.data()['title']),

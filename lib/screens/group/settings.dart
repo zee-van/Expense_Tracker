@@ -64,7 +64,6 @@ class _SettingsPageState extends State<SettingsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Card(
-                  color: Colors.blue.shade50,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -144,12 +143,8 @@ class _SettingsPageState extends State<SettingsPage> {
                             children: [
                               Text(
                                 'Admin Info',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blueGrey,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 8),
                               Text.rich(
@@ -210,7 +205,6 @@ class _SettingsPageState extends State<SettingsPage> {
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     fontSize: 18,
-                    color: Colors.blueGrey.shade700,
                   ),
                 ),
                 SizedBox(height: 8),
@@ -267,7 +261,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
-                                  color: Colors.black87,
                                 ),
                               ),
                               subtitle: Text(

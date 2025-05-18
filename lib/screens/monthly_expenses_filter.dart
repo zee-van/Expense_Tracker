@@ -1,40 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expense_tracker/data/categories.dart';
+import 'package:expense_tracker/providers/categries_colors_icons.dart';
 import 'package:expense_tracker/screens/expense_details.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class MonthlyExpensesFilter extends StatefulWidget {
+class MonthlyExpensesFilter extends ConsumerStatefulWidget {
   const MonthlyExpensesFilter({super.key, required this.id, this.identifier});
   final String id;
   final String? identifier;
 
   @override
-  State<MonthlyExpensesFilter> createState() => _MonthlyExpensesFilterState();
+  ConsumerState<MonthlyExpensesFilter> createState() =>
+      _MonthlyExpensesFilterState();
 }
 
-class _MonthlyExpensesFilterState extends State<MonthlyExpensesFilter> {
+class _MonthlyExpensesFilterState extends ConsumerState<MonthlyExpensesFilter> {
   String? _selectedYear;
   String? _selectedMonth;
   Map<int, List<String>> _availableYearsAndMonths = {};
-
-  IconData? getCategoryIcon(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.icon;
-      }
-    }
-    return null;
-  }
-
-  Color? getCategoryColor(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.color;
-      }
-    }
-    return Colors.grey;
-  }
 
   @override
   void initState() {
@@ -168,6 +152,7 @@ class _MonthlyExpensesFilterState extends State<MonthlyExpensesFilter> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryServices = ref.watch(categoryServiceProvider);
     return Scaffold(
       appBar: AppBar(title: Text('Filtered Expenses')),
       body: Padding(
@@ -287,8 +272,10 @@ class _MonthlyExpensesFilterState extends State<MonthlyExpensesFilter> {
                           },
                           leading: CircleAvatar(
                             child: Icon(
-                              getCategoryIcon(myExpense.data()['category']),
-                              color: getCategoryColor(
+                              categoryServices.getCategoryIcon(
+                                myExpense.data()['category'],
+                              ),
+                              color: categoryServices.getCategoryColor(
                                 myExpense.data()['category'],
                               ),
                             ),

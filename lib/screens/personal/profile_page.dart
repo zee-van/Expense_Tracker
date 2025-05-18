@@ -1,18 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense_tracker/providers/theme_provider.dart';
 import 'package:expense_tracker/screens/home_page.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:expense_tracker/widgets/common_widgets/input_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class ProfilePageScreen extends StatefulWidget {
+class ProfilePageScreen extends ConsumerStatefulWidget {
   const ProfilePageScreen({super.key});
 
   @override
-  State<ProfilePageScreen> createState() => _ProfilePageScreenState();
+  ConsumerState<ProfilePageScreen> createState() => _ProfilePageScreenState();
 }
 
-class _ProfilePageScreenState extends State<ProfilePageScreen> {
+class _ProfilePageScreenState extends ConsumerState<ProfilePageScreen> {
   final loggedUser = FirebaseAuth.instance.currentUser;
   TextEditingController? nameController;
   TextEditingController? emailController;
@@ -78,6 +81,7 @@ class _ProfilePageScreenState extends State<ProfilePageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ref.watch(themeProvider);
     return Form(
       key: _form,
       child: Container(
@@ -93,6 +97,7 @@ class _ProfilePageScreenState extends State<ProfilePageScreen> {
           ),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
@@ -123,24 +128,29 @@ class _ProfilePageScreenState extends State<ProfilePageScreen> {
                       : CircularProgressIndicator(),
             ),
             SizedBox(height: 40),
-            GestureDetector(
+            ElevatedButtonWidget(
+              label:
+                  isUpdating
+                      ? CircularProgressIndicator()
+                      : Text('Save', style: TextStyle(fontSize: 18)),
               onTap: _updateProfile,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Color(0xFFEB50A8).withAlpha(200),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: TextButton(
-                  onPressed: () {
-                    _updateProfile();
-                  },
-                  child:
-                      isUpdating
-                          ? CircularProgressIndicator()
-                          : Text('Save', style: TextStyle(fontSize: 18)),
+            ),
+            SizedBox(height: 40),
+            SwitchListTile(
+              value: theme.isDarkMode,
+              onChanged: (value) {
+                theme.toggleTheme();
+              },
+              title: Text('Dark Mode'),
+              subtitle: Text(
+                'Change your app appearance',
+                style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
+              activeColor: Colors.green.shade900,
+              contentPadding: EdgeInsets.only(left: 34, right: 22),
+              secondary: Icon(Icons.nights_stay),
             ),
           ],
         ),

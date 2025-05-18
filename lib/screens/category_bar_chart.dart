@@ -1,37 +1,21 @@
-import 'package:expense_tracker/data/categories.dart';
+import 'package:expense_tracker/providers/categries_colors_icons.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class CategoryBarChart extends StatefulWidget {
+class CategoryBarChart extends ConsumerStatefulWidget {
   final Map<String, double> data;
 
   const CategoryBarChart({super.key, required this.data});
 
   @override
-  State<CategoryBarChart> createState() => _CategoryBarChartState();
+  ConsumerState<CategoryBarChart> createState() => _CategoryBarChartState();
 }
 
-class _CategoryBarChartState extends State<CategoryBarChart> {
-  IconData? getCategoryIcon(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.icon;
-      }
-    }
-    return null;
-  }
-
-  Color? getCategoryColor(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.color;
-      }
-    }
-    return Colors.grey;
-  }
-
+class _CategoryBarChartState extends ConsumerState<CategoryBarChart> {
   @override
   Widget build(BuildContext context) {
+    final categoryServices = ref.watch(categoryServiceProvider);
     final barCount = widget.data.length;
     const minSpacing = 40.0;
 
@@ -47,7 +31,7 @@ class _CategoryBarChartState extends State<CategoryBarChart> {
                 widget.data.entries.map((entry) {
                   final category = entry.key;
                   final amount = entry.value;
-                  final color = getCategoryColor(category);
+                  final color = categoryServices.getCategoryColor(category);
 
                   return BarChartGroupData(
                     x: widget.data.keys.toList().indexOf(category),
@@ -67,7 +51,10 @@ class _CategoryBarChartState extends State<CategoryBarChart> {
                   showTitles: true,
                   getTitlesWidget: (double value, TitleMeta meta) {
                     String category = widget.data.keys.elementAt(value.toInt());
-                    return Icon(getCategoryIcon(category), size: 14);
+                    return Icon(
+                      categoryServices.getCategoryIcon(category),
+                      size: 14,
+                    );
                   },
                 ),
               ),

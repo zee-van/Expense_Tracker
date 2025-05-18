@@ -4,6 +4,7 @@ import 'package:expense_tracker/screens/group/add_member_to_group.dart';
 import 'package:expense_tracker/screens/group/group_expense_name.dart';
 import 'package:expense_tracker/screens/group/see_group_member.dart';
 import 'package:expense_tracker/screens/group/settings.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,6 @@ class GroupExpenseListScreen extends StatefulWidget {
 
 class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
   final loggedUser = FirebaseAuth.instance.currentUser;
-  bool _showOptions = false;
 
   void _showGroupsFeatures(String groupName, String adminId, String id) async {
     final adminDoc =
@@ -53,69 +53,51 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                       Text(groupName, style: TextStyle(fontSize: 22)),
                       Text('Created By: $admin'),
                       SizedBox(height: 30),
-                      InkWell(
+                      ElevatedButtonWidget(
                         onTap: () {
                           Navigator.of(context).pop();
                           _showSeeMembersModal(id);
                         },
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFEB50A8).withAlpha(220),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.group),
-                              SizedBox(width: 10),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  _showSeeMembersModal(id);
-                                },
-                                style: TextButton.styleFrom(),
-                                child: Text(
-                                  'See Members',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ),
-                            ],
-                          ),
+                        label: Row(
+                          children: [
+                            SizedBox(width: 20),
+                            Icon(
+                              Icons.group,
+                              size: 25,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              'See Members',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 5),
-                      InkWell(
+                      ElevatedButtonWidget(
                         onTap: () {
+                          Navigator.of(context).pop();
                           _addMembersToGroup(id);
                         },
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFEB50A8).withAlpha(220),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.person),
-                              SizedBox(width: 10),
-                              TextButton(
-                                onPressed: () {
-                                  _addMembersToGroup(id);
-                                },
-                                style: TextButton.styleFrom(),
-                                child: Text(
-                                  'Add Members',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ),
-                            ],
-                          ),
+                        label: Row(
+                          children: [
+                            SizedBox(width: 20),
+                            Icon(
+                              Icons.person,
+                              size: 25,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              'Add Members',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 5),
-                      InkWell(
+                      ElevatedButtonWidget(
                         onTap: () {
                           Navigator.of(context).pop();
                           Navigator.of(context).push(
@@ -128,38 +110,20 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                             ),
                           );
                         },
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          decoration: BoxDecoration(
-                            color: Color(0xFFEB50A8).withAlpha(220),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.settings),
-                              SizedBox(width: 10),
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder:
-                                          (ctx) => SettingsPage(
-                                            adminId: adminId,
-                                            groupId: id,
-                                          ),
-                                    ),
-                                  );
-                                },
-                                style: TextButton.styleFrom(),
-                                child: Text(
-                                  'Settings',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                              ),
-                            ],
-                          ),
+                        label: Row(
+                          children: [
+                            SizedBox(width: 20),
+                            Icon(
+                              Icons.settings,
+                              size: 25,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            SizedBox(width: 15),
+                            Text(
+                              'Settings',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ],
                         ),
                       ),
                       SizedBox(height: 30),
@@ -304,7 +268,6 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                     margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                     decoration: BoxDecoration(
-                      color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -356,9 +319,6 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                             group['admin'],
                             group.id,
                           );
-                          setState(() {
-                            _showOptions = !_showOptions;
-                          });
                         },
                         child: Icon(Icons.more_vert),
                       ),

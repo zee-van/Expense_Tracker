@@ -90,10 +90,7 @@ class _LoginRegisterState extends State<LoginRegister> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 backgroundColor: Color(0xFFEB50A8).withAlpha(220),
-                content: Text(
-                  'Your account has been Regitered Successfully.',
-                  style: TextStyle(color: Colors.white),
-                ),
+                content: Text('Your account has been Regitered Successfully.'),
               ),
             );
             Navigator.of(context).pop();

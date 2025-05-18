@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expense_tracker/data/categories.dart';
+import 'package:expense_tracker/providers/categries_colors_icons.dart';
 import 'package:expense_tracker/screens/category_bar_chart.dart';
 import 'package:expense_tracker/screens/category_page.dart';
-// import 'package:expense_tracker/model/expense_data.dart';
 import 'package:expense_tracker/screens/expense_details.dart';
 import 'package:expense_tracker/screens/group/group_expense_list.dart';
 import 'package:expense_tracker/screens/group/group_expense_name.dart';
@@ -10,19 +9,21 @@ import 'package:expense_tracker/screens/monthly_expenses_filter.dart';
 import 'package:expense_tracker/screens/personal/add_new_persoanl_expense.dart';
 import 'package:expense_tracker/screens/personal/profile_page.dart';
 import 'package:expense_tracker/widgets/login_register.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class HomePageScreen extends StatefulWidget {
+class HomePageScreen extends ConsumerStatefulWidget {
   const HomePageScreen({super.key});
 
   @override
-  State<HomePageScreen> createState() => _HomePageScreenState();
+  ConsumerState<HomePageScreen> createState() => _HomePageScreenState();
 }
 
-class _HomePageScreenState extends State<HomePageScreen> {
+class _HomePageScreenState extends ConsumerState<HomePageScreen> {
   int _currentIndex = 0;
   User? loggedUser = FirebaseAuth.instance.currentUser;
   String? _username = '';
@@ -82,28 +83,28 @@ class _HomePageScreenState extends State<HomePageScreen> {
         context: context,
         builder: (ctx) {
           return CupertinoAlertDialog(
-            title: Text('Confirm Logout'),
+            title: Text('Conform Logout'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Text('Confirm Logout'),
                 Text('Are you sure want to logout!'),
                 SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () {
+                    TextButtonWidget(
+                      onTap: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel'),
+                      label: Text('Cancel'),
                     ),
                     SizedBox(width: 10),
-                    OutlinedButton(
-                      onPressed: () {
+                    OutlinedButtonWidget(
+                      onTap: () {
                         _conformLogout();
                         Navigator.of(context).pop();
                       },
-                      child: Text('Conform'),
+                      label: Text('Conform'),
                     ),
                   ],
                 ),
@@ -123,24 +124,25 @@ class _HomePageScreenState extends State<HomePageScreen> {
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Confirm Logout'),
+                Text('Conform Logout'),
                 Text('Are you sure want to logout!'),
                 SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () {
+                    TextButtonWidget(
+                      onTap: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel'),
+                      label: Text('Cancel'),
                     ),
                     SizedBox(width: 10),
-                    OutlinedButton(
-                      onPressed: () {
+                    OutlinedButtonWidget(
+                      onTap: () {
                         _conformLogout();
                         Navigator.of(context).pop();
                       },
-                      child: Text('Conform'),
+                      label: Text('Conform'),
                     ),
                   ],
                 ),
@@ -166,32 +168,14 @@ class _HomePageScreenState extends State<HomePageScreen> {
       isScrollControlled: true,
       builder: (ctx) {
         if (identifier == 'EXPENSE') {
-          return AddNewPersoanlExpense(identifier: 'PERSONAL');
+          return AddNewPersoanlExpense();
         }
         if (identifier == 'GROUP_NAME') {
           return GroupExpenseName();
         }
-        return AddNewPersoanlExpense(identifier: 'PERSONAL');
+        return AddNewPersoanlExpense();
       },
     );
-  }
-
-  IconData? getCategoryIcon(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.icon;
-      }
-    }
-    return null;
-  }
-
-  Color? getCategoryColor(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.color;
-      }
-    }
-    return Colors.grey;
   }
 
   void extractMonths(List<QueryDocumentSnapshot> expenses) {
@@ -225,6 +209,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryServices = ref.watch(categoryServiceProvider);
     Widget content = Padding(
       padding: const EdgeInsets.all(20.0),
       child: Center(
@@ -330,7 +315,9 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         vertical: 24,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withAlpha(30),
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
@@ -356,10 +343,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 20),
                           decoration: BoxDecoration(
-                            color:
-                                _isChart
-                                    ? Color(0xFFEB50A8).withAlpha(220)
-                                    : null,
+                            color: _isChart ? Color(0xFFEB50A8) : null,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: TextButton(
@@ -375,10 +359,7 @@ class _HomePageScreenState extends State<HomePageScreen> {
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 20),
                           decoration: BoxDecoration(
-                            color:
-                                !_isChart
-                                    ? Color(0xFFEB50A8).withAlpha(220)
-                                    : null,
+                            color: !_isChart ? Color(0xFFEB50A8) : null,
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: TextButton(
@@ -437,11 +418,15 @@ class _HomePageScreenState extends State<HomePageScreen> {
                                 Container(
                                   margin: EdgeInsets.only(top: 5),
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primary.withAlpha(30),
                                     borderRadius: BorderRadius.circular(8.0),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.grey.withAlpha(60),
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary.withAlpha(30),
                                         spreadRadius: 2,
                                         blurRadius: 5,
                                         offset: Offset(0, 3),
@@ -471,8 +456,12 @@ class _HomePageScreenState extends State<HomePageScreen> {
                   },
                   leading: CircleAvatar(
                     child: Icon(
-                      getCategoryIcon(myExpense.data()['category']),
-                      color: getCategoryColor(myExpense.data()['category']),
+                      categoryServices.getCategoryIcon(
+                        myExpense.data()['category'],
+                      ),
+                      color: categoryServices.getCategoryColor(
+                        myExpense.data()['category'],
+                      ),
                     ),
                   ),
                   title: Text(myExpense.data()['title']),

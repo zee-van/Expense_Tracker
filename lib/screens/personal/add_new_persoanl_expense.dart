@@ -1,26 +1,26 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_tracker/data/categories.dart';
 import 'package:expense_tracker/model/category.dart';
+import 'package:expense_tracker/model/expense_data.dart';
+import 'package:expense_tracker/providers/add_personal_expense_provider.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:expense_tracker/widgets/common_widgets/input_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class AddNewPersoanlExpense extends StatefulWidget {
-  const AddNewPersoanlExpense({
-    super.key,
-    required this.identifier,
-    this.groupId,
-  });
-  final String identifier;
-  final String? groupId;
+class AddNewPersoanlExpense extends ConsumerStatefulWidget {
+  const AddNewPersoanlExpense({super.key});
 
   @override
-  State<AddNewPersoanlExpense> createState() => _AddNewPersoanlExpenseState();
+  ConsumerState<AddNewPersoanlExpense> createState() =>
+      _AddNewPersoanlExpenseState();
 }
 
-class _AddNewPersoanlExpenseState extends State<AddNewPersoanlExpense> {
+class _AddNewPersoanlExpenseState extends ConsumerState<AddNewPersoanlExpense> {
   ExpenseCategory? _selectedCategory;
+  final loggedUser = FirebaseAuth.instance.currentUser;
+
   String _enteredTitle = '';
   String _amount = '';
   String _description = '';
@@ -44,46 +44,35 @@ class _AddNewPersoanlExpenseState extends State<AddNewPersoanlExpense> {
     }
   }
 
-  Future<void> _saveExpense() async {
+  Future<void> _addPersonalExpense() async {
     final isValid = _form.currentState!.validate();
     if (isValid) {
       _form.currentState!.save();
       try {
+        final personalExpense = PersonalExpenseData(
+          amount: int.parse(_amount),
+          category: _selectedCategory!.name,
+          date: _selectedDate,
+          description: _description,
+          title: _enteredTitle,
+          userId: loggedUser!.uid,
+        );
         setState(() {
           _isAdding = true;
         });
-        final loggedUser = FirebaseAuth.instance.currentUser;
-        if (widget.identifier == 'PERSONAL') {
-          await FirebaseFirestore.instance.collection('personalExpenses').add({
-            'userId': loggedUser!.uid,
-            'title': _enteredTitle,
-            'amount': int.tryParse(_amount),
-            'description': _description,
-            'category': _selectedCategory!.name,
-            'date': _selectedDate,
-          });
-        }
-        if (widget.identifier == 'GROUP') {
-          await FirebaseFirestore.instance.collection('groupExpenses').add({
-            'groupId': widget.groupId,
-            'title': _enteredTitle,
-            'amount': int.tryParse(_amount),
-            'description': _description,
-            'category': _selectedCategory!.name,
-            'userId': loggedUser!.uid,
-            'date': _selectedDate,
-          });
-        }
+        await ref
+            .watch(addPersonalExpenseProvider.notifier)
+            .addPersonalExpense(personalExpense);
 
         setState(() {
           _isAdding = false;
           Navigator.of(context).pop();
         });
       } catch (e) {
-        setState(() {
-          _isAdding = false;
+        setState(() {});
+        if (mounted) {
           Navigator.of(context).pop();
-        });
+        }
       }
     }
   }
@@ -199,27 +188,15 @@ class _AddNewPersoanlExpenseState extends State<AddNewPersoanlExpense> {
                 ],
               ),
               SizedBox(height: 40),
-              Container(
-                width: double.infinity,
-
-                decoration: BoxDecoration(
-                  color: Color(0xFFEB50A8).withAlpha(220),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: TextButton(
-                  onPressed: _saveExpense,
-                  style: TextButton.styleFrom(
-                    // padding: EdgeInsets.symmetric(vertical: ),
-                    // backgroundColor: Color(0xFFEB50A8).withAlpha(220),
-                  ),
-                  child:
-                      _isAdding
-                          ? CircularProgressIndicator()
-                          : Text(
-                            'Add Expense',
-                            style: TextStyle(color: Colors.black),
-                          ),
-                ),
+              ElevatedButtonWidget(
+                onTap: _addPersonalExpense,
+                label:
+                    _isAdding
+                        ? CircularProgressIndicator()
+                        : Text(
+                          'Add Expense',
+                          style: TextStyle(color: Colors.black),
+                        ),
               ),
             ],
           ),

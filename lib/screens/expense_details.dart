@@ -1,43 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:expense_tracker/data/categories.dart';
+import 'package:expense_tracker/providers/categries_colors_icons.dart';
 import 'package:expense_tracker/screens/update_expense.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-class ExpenseDetails extends StatefulWidget {
+class ExpenseDetails extends ConsumerStatefulWidget {
   const ExpenseDetails({super.key, required this.expenseDetails});
   final QueryDocumentSnapshot<Map<String, dynamic>> expenseDetails;
 
   @override
-  State<ExpenseDetails> createState() => _ExpenseDetailsState();
+  ConsumerState<ExpenseDetails> createState() => _ExpenseDetailsState();
 }
 
-class _ExpenseDetailsState extends State<ExpenseDetails> {
+class _ExpenseDetailsState extends ConsumerState<ExpenseDetails> {
   final loggedUser = FirebaseAuth.instance.currentUser;
   Future<String> _getAddedBy(String id) async {
     final userDoc =
         await FirebaseFirestore.instance.collection('users').doc(id).get();
     return userDoc.data()!['name'];
-  }
-
-  IconData? getCategoryIcon(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.icon;
-      }
-    }
-    return null;
-  }
-
-  Color? getCategoryColor(String categoryName) {
-    for (var category in expenseCategories) {
-      if (category.name == categoryName) {
-        return category.color;
-      }
-    }
-    return Colors.grey;
   }
 
   void _showConfirmDeleteDialog(String id) {
@@ -86,19 +70,21 @@ class _ExpenseDetailsState extends State<ExpenseDetails> {
                 Text('Are you sure want to delete this expense'),
                 SizedBox(height: 20),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () {
+                    TextButtonWidget(
+                      onTap: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel'),
+                      label: Text('Cancel'),
                     ),
-                    OutlinedButton(
-                      onPressed: () {
+                    SizedBox(width: 10),
+                    OutlinedButtonWidget(
+                      onTap: () {
                         _deleteExpense(id);
                         Navigator.of(context).pop();
                       },
-                      child: Text('Conform'),
+                      label: Text('Conform'),
                     ),
                   ],
                 ),
@@ -137,6 +123,7 @@ class _ExpenseDetailsState extends State<ExpenseDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final categoryServices = ref.watch(categoryServiceProvider);
     final data = widget.expenseDetails.data();
 
     final title = data['title'] ?? '';
@@ -205,9 +192,9 @@ class _ExpenseDetailsState extends State<ExpenseDetails> {
               Column(
                 children: [
                   Chip(
-                    avatar: Icon(getCategoryIcon(category)),
+                    avatar: Icon(categoryServices.getCategoryIcon(category)),
                     label: Text(category),
-                    backgroundColor: Colors.blue.shade50,
+                    // backgroundColor: Colors.blue.shade50,
                   ),
                   Chip(
                     avatar: const Icon(Icons.person),
@@ -231,75 +218,38 @@ class _ExpenseDetailsState extends State<ExpenseDetails> {
                         );
                       },
                     ),
-                    backgroundColor: Colors.green.shade50,
                   ),
                 ],
               ),
               SizedBox(height: 30),
               if (data['userId'] == loggedUser!.uid && data['groupId'] == null)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Column(
                   children: [
-                    InkWell(
+                    ElevatedButtonWidget(
                       onTap: () {
                         Navigator.of(context).pop();
                         _showUpdateExpenseDialog(widget.expenseDetails.id);
                       },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFEB50A8).withAlpha(220),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.update),
-                            SizedBox(width: 10),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                                _showUpdateExpenseDialog(
-                                  widget.expenseDetails.id,
-                                );
-                              },
-                              style: TextButton.styleFrom(),
-                              child: Text(
-                                'Update',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
-                        ),
+                      label: Row(
+                        children: [
+                          SizedBox(width: 20),
+                          Icon(Icons.update, color: Colors.white, size: 25),
+                          SizedBox(width: 10),
+                          Text('Update', style: TextStyle(color: Colors.black)),
+                        ],
                       ),
                     ),
-                    InkWell(
+                    ElevatedButtonWidget(
                       onTap: () {
                         _showConfirmDeleteDialog(widget.expenseDetails.id);
                       },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        decoration: BoxDecoration(
-                          color: Color(0xFFEB50A8).withAlpha(220),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.delete),
-                            SizedBox(width: 10),
-                            TextButton(
-                              onPressed: () {
-                                _showConfirmDeleteDialog(
-                                  widget.expenseDetails.id,
-                                );
-                              },
-                              style: TextButton.styleFrom(),
-                              child: Text(
-                                'Delete',
-                                style: TextStyle(color: Colors.black),
-                              ),
-                            ),
-                          ],
-                        ),
+                      label: Row(
+                        children: [
+                          SizedBox(width: 20),
+                          Icon(Icons.delete, color: Colors.white, size: 25),
+                          SizedBox(width: 10),
+                          Text('Delete', style: TextStyle(color: Colors.black)),
+                        ],
                       ),
                     ),
                   ],
