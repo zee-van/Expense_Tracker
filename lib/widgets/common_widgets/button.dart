@@ -5,11 +5,9 @@ class ElevatedButtonWidget extends StatelessWidget {
     super.key,
     required this.label,
     required this.onTap,
-    this.icon,
   });
   final Widget label;
   final void Function() onTap;
-  final Icon? icon;
 
   @override
   Widget build(BuildContext context) {
