@@ -265,10 +265,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               subtitle: Text(
                                 userEmail,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey[700],
-                                ),
+                                style: TextStyle(fontSize: 13),
                               ),
                               trailing: Column(
                                 mainAxisSize: MainAxisSize.min,

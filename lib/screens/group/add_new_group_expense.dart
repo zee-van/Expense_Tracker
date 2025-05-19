@@ -101,10 +101,9 @@ class _AddNewGroupExpenseState extends ConsumerState<AddNewGroupExpense> {
                     ),
                     Text(
                       'Track your spending and stay on budget!',
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall!.copyWith(fontSize: 12),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -193,7 +192,7 @@ class _AddNewGroupExpenseState extends ConsumerState<AddNewGroupExpense> {
                 label:
                     _isAdding
                         ? CircularProgressIndicator()
-                        : Text('Add Expense', style: TextStyle(fontSize: 18)),
+                        : Text('Add Expense'),
                 onTap: _addGrouplExpense,
               ),
             ],

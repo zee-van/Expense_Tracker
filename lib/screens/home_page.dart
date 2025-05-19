@@ -86,6 +86,7 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
             title: Text('Conform Logout'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text('Are you sure want to logout!'),
                 SizedBox(height: 20),
@@ -119,12 +120,13 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
         builder: (ctx) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
+            title: Text('Conform Logout'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Conform Logout'),
                 Text('Are you sure want to logout!'),
                 SizedBox(height: 20),
                 Row(
@@ -219,13 +221,13 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
           height: 200,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Color.fromARGB(233, 213, 112, 169),
-            borderRadius: BorderRadius.circular(15),
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10,
-                offset: Offset(0, 4),
+                color: Theme.of(context).colorScheme.primary,
+                blurRadius: 2,
+                spreadRadius: 1,
               ),
             ],
           ),
@@ -234,40 +236,22 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
             children: [
               Text(
                 'Welcome to Our App!',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 10),
               Text(
                 'Sign in to access personalized features and sync your data securely.',
-                style: TextStyle(fontSize: 16, color: Colors.white70),
+                style: TextStyle(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
-              GestureDetector(
-                onTap: _loginDialog,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 12,
-                    horizontal: 24,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Get Started',
-                    style: TextStyle(
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+              ElevatedButtonWidget(
+                label: Text(
+                  'Get Started',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
+                onTap: _loginDialog,
               ),
             ],
           ),
@@ -290,7 +274,47 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
           }
           final myExpenses = snapshots.data!.docs;
           if (myExpenses.isEmpty) {
-            return Center(child: Text('No expenses added'));
+            return Center(
+              child: Container(
+                width: 350,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.primary,
+                      blurRadius: 2,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  // mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      'Add Your Expense Here!',
+                      style: TextStyle(fontSize: 24),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'You haven\'t add your personal expense yet!!!.',
+                      style: TextStyle(fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 30),
+                    ElevatedButtonWidget(
+                      onTap: () {
+                        _showModelForAddExpense('EXPENSE');
+                      },
+                      label: Text('Add New Personal Expense'),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
 
           int totalExpenses = 0;
@@ -309,7 +333,6 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
                   children: [
                     Container(
                       width: double.infinity,
-
                       padding: EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 24,
@@ -331,8 +354,17 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Total Expenses\n Rs.$totalExpenses',
+                            'Total Expenses',
                             style: Theme.of(context).textTheme.headlineLarge,
+                          ),
+                          Text(
+                            'Rs. $totalExpenses',
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineLarge!.copyWith(
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ],
                       ),
@@ -352,7 +384,12 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
                                 _isChart = !_isChart;
                               });
                             },
-                            child: Text('Chart'),
+                            child: Text(
+                              'Chart',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -362,8 +399,8 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
                             color: !_isChart ? Color(0xFFEB50A8) : null,
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          child: TextButton(
-                            onPressed: () {
+                          child: TextButtonWidget(
+                            onTap: () {
                               setState(() {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
@@ -373,10 +410,14 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
                                         ),
                                   ),
                                 );
-                                // _isChart = !_isChart;
                               });
                             },
-                            child: Text('Filter'),
+                            label: Text(
+                              'Filter',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -445,48 +486,66 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
                 ),
               ),
               for (final myExpense in myExpenses)
-                ListTile(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder:
-                            (ctx) => ExpenseDetails(expenseDetails: myExpense),
-                      ),
-                    );
-                  },
-                  leading: CircleAvatar(
-                    child: Icon(
-                      categoryServices.getCategoryIcon(
-                        myExpense.data()['category'],
-                      ),
-                      color: categoryServices.getCategoryColor(
-                        myExpense.data()['category'],
-                      ),
+                Container(
+                  margin: EdgeInsets.only(top: 4, left: 4, right: 4),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).colorScheme.primary.withAlpha(30),
+                        Theme.of(context).colorScheme.primary.withAlpha(40),
+                        Theme.of(context).colorScheme.primary.withAlpha(50),
+                      ],
                     ),
                   ),
-                  title: Text(myExpense.data()['title']),
-                  subtitle: Text(
-                    myExpense.data()['description'],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Rs.${myExpense.data()['amount']}',
-                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold,
+                  child: ListTile(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder:
+                              (ctx) => ExpenseDetails(
+                                expenseDetails: myExpense,
+                                // identifier: 'PERSONAL',
+                                // expenseId: myExpense.id,
+                              ),
+                        ),
+                      );
+                    },
+                    leading: CircleAvatar(
+                      child: Icon(
+                        categoryServices.getCategoryIcon(
+                          myExpense.data()['category'],
+                        ),
+                        color: categoryServices.getCategoryColor(
+                          myExpense.data()['category'],
                         ),
                       ),
-                      Text(
-                        DateFormat('yyyy-MM-dd').format(
-                          ((myExpense.data()['date']) as Timestamp).toDate(),
+                    ),
+                    title: Text(myExpense.data()['title']),
+                    subtitle: Text(
+                      myExpense.data()['description'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Rs.${myExpense.data()['amount']}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium!.copyWith(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                        Text(
+                          DateFormat('yyyy-MM-dd').format(
+                            ((myExpense.data()['date']) as Timestamp).toDate(),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               SizedBox(height: 70),
@@ -510,66 +569,40 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
         title: Text('Expense Tracker'),
         actions: [
           loggedUser != null
-              ? InkWell(
+              ? TextButtonWidget(
                 onTap: () {
                   _logoutDialog();
                 },
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 100,
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                  margin: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Color(0xFFEB50A8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout, color: Colors.black),
-                      // SvgPicture.asset('assets/icons/dots.svg', height: 5, width: 5),
-                      SizedBox(width: 5),
-                      Text(
-                        'Logout',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
+                label: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout, size: 25),
+                    SizedBox(width: 5),
+                    Text(
+                      'Logout',
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               )
-              : InkWell(
+              : TextButtonWidget(
                 onTap: () {
                   _loginDialog();
                 },
-                child: Container(
-                  alignment: Alignment.center,
-                  width: 100,
-                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-                  margin: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: Color(0xFFEB50A8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.person, color: Colors.black),
-                      // SvgPicture.asset('assets/icons/dots.svg', height: 5, width: 5),
-                      SizedBox(width: 5),
-                      Text(
-                        'Login',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
+                label: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.person, size: 25),
+                    SizedBox(width: 5),
+                    Text(
+                      'Login',
+                      style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
         ],
@@ -620,7 +653,21 @@ class _HomePageScreenState extends ConsumerState<HomePageScreen> {
                         icon: CircleAvatar(
                           child:
                               _username != ''
-                                  ? Text(_username![0].toUpperCase())
+                                  ? Text(
+                                    _username![0].toUpperCase(),
+                                    style:
+                                        _currentIndex == 3
+                                            ? TextStyle(
+                                              color: Color.fromARGB(
+                                                255,
+                                                255,
+                                                0,
+                                                144,
+                                              ),
+                                              fontSize: 20,
+                                            )
+                                            : null,
+                                  )
                                   : CircularProgressIndicator(),
                         ),
                         label: 'You',

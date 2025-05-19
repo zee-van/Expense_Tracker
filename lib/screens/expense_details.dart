@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_tracker/providers/categries_colors_icons.dart';
+// import 'package:expense_tracker/providers/fetch_expense_details_provider.dart';
 import 'package:expense_tracker/screens/update_expense.dart';
 import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -9,8 +10,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 class ExpenseDetails extends ConsumerStatefulWidget {
-  const ExpenseDetails({super.key, required this.expenseDetails});
+  const ExpenseDetails({
+    super.key,
+    required this.expenseDetails,
+    // this.identifier,
+    // this.expenseId,
+  });
   final QueryDocumentSnapshot<Map<String, dynamic>> expenseDetails;
+  // final String? identifier;
+  // final String? expenseId;
 
   @override
   ConsumerState<ExpenseDetails> createState() => _ExpenseDetailsState();
@@ -23,6 +31,25 @@ class _ExpenseDetailsState extends ConsumerState<ExpenseDetails> {
         await FirebaseFirestore.instance.collection('users').doc(id).get();
     return userDoc.data()!['name'];
   }
+
+  @override
+  void initState() {
+    super.initState();
+    // _fetchExpenseDetail();
+  }
+
+  // Future<void> _fetchExpenseDetail() async {
+  //   try {
+  //     print('fetching...');
+
+  //     final data = await ref
+  //         .read(fetchExpenseDetailsProvider.notifier)
+  //         .fetchExpenseDetails(widget.identifier!, widget.expenseId!);
+  //     print(data.data()!['title']);
+  //   } catch (e) {
+  //     setState(() {});
+  //   }
+  // }
 
   void _showConfirmDeleteDialog(String id) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
@@ -123,6 +150,7 @@ class _ExpenseDetailsState extends ConsumerState<ExpenseDetails> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final categoryServices = ref.watch(categoryServiceProvider);
     final data = widget.expenseDetails.data();
 
@@ -144,16 +172,19 @@ class _ExpenseDetailsState extends ConsumerState<ExpenseDetails> {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
-              BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2),
+              BoxShadow(
+                color: colorScheme.primary,
+                blurRadius: 10,
+                spreadRadius: 1,
+              ),
             ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              /// Title & Amount
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -167,7 +198,7 @@ class _ExpenseDetailsState extends ConsumerState<ExpenseDetails> {
                   Text(
                     'Rs. $amount',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: Colors.green[700],
+                      color: Colors.red,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -191,33 +222,44 @@ class _ExpenseDetailsState extends ConsumerState<ExpenseDetails> {
               const SizedBox(height: 16),
               Column(
                 children: [
-                  Chip(
-                    avatar: Icon(categoryServices.getCategoryIcon(category)),
-                    label: Text(category),
-                    // backgroundColor: Colors.blue.shade50,
+                  Row(
+                    children: [
+                      Icon(
+                        categoryServices.getCategoryIcon(category),
+                        color: categoryServices.getCategoryColor(category),
+                        size: 25,
+                      ),
+                      SizedBox(width: 10),
+                      Text(category),
+                    ],
                   ),
-                  Chip(
-                    avatar: const Icon(Icons.person),
-                    label: FutureBuilder<Object>(
-                      future: _getAddedBy(data['userId']),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Text('Loading added by...');
-                        } else if (snapshot.hasError) {
-                          return const Text('Error loading user');
-                        } else if (!snapshot.hasData || snapshot.data == null) {
-                          return const Text('Unknown user');
-                        }
+                  SizedBox(height: 10),
+                  Row(
+                    children: [
+                      const Icon(Icons.person, size: 25),
+                      SizedBox(width: 10),
+                      FutureBuilder<Object>(
+                        future: _getAddedBy(data['userId']),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Text('Loading added by...');
+                          } else if (snapshot.hasError) {
+                            return const Text('Error loading user');
+                          } else if (!snapshot.hasData ||
+                              snapshot.data == null) {
+                            return const Text('Unknown user');
+                          }
 
-                        final userName = snapshot.data!;
-                        return Text(
-                          'Added by: $userName',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(fontWeight: FontWeight.w500),
-                        );
-                      },
-                    ),
+                          final userName = snapshot.data!;
+                          return Text(
+                            'Added by: $userName',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),

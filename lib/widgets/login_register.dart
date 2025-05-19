@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:expense_tracker/widgets/common_widgets/input_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -136,7 +137,7 @@ class _LoginRegisterState extends State<LoginRegister> {
           ),
         ),
         Container(
-          padding: EdgeInsets.only(left: 10, right: 10, bottom: 20, top: 30),
+          padding: EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 30),
           child: Form(
             key: _form,
             child: Column(
@@ -221,37 +222,14 @@ class _LoginRegisterState extends State<LoginRegister> {
                   ),
                 ),
                 SizedBox(height: 30),
-                if (_isCreating)
-                  Container(
-                    alignment: Alignment.center,
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFEB50A8).withAlpha(220),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: CircularProgressIndicator(),
-                  ),
-                if (!_isCreating)
-                  Container(
-                    width: double.infinity,
 
-                    decoration: BoxDecoration(
-                      color: Color(0xFFEB50A8).withAlpha(220),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextButton(
-                      onPressed: _saveUser,
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 10),
-                        // backgroundColor: Color(0xFFEB50A8).withAlpha(220),
-                      ),
-                      child: Text(
-                        _isLogin ? 'Login' : 'Register',
-                        style: TextStyle(fontSize: 20, color: Colors.black),
-                      ),
-                    ),
-                  ),
+                ElevatedButtonWidget(
+                  onTap: _saveUser,
+                  label:
+                      _isCreating
+                          ? CircularProgressIndicator()
+                          : Text(_isLogin ? 'Login' : 'Register'),
+                ),
                 if (!_isCreating) SizedBox(height: 10),
                 if (!_isCreating)
                   Row(

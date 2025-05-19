@@ -148,7 +148,7 @@ class _ProfilePageScreenState extends ConsumerState<ProfilePageScreen> {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              activeColor: Colors.green.shade900,
+              activeColor: Color(0xFFEB50A8).withAlpha(200),
               contentPadding: EdgeInsets.only(left: 34, right: 22),
               secondary: Icon(Icons.nights_stay),
             ),

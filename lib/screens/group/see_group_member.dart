@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:expense_tracker/widgets/common_widgets/button.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -45,11 +46,11 @@ class _SeeGroupMemberScreenState extends State<SeeGroupMemberScreen> {
       showCupertinoDialog(
         context: context,
         builder: (ctx) {
-          return AlertDialog(
+          return CupertinoAlertDialog(
             title: Text('Conform Delete'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Are tou sure want to remove this user($name) from your group.',
@@ -58,21 +59,21 @@ class _SeeGroupMemberScreenState extends State<SeeGroupMemberScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () {
+                    TextButtonWidget(
+                      onTap: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel'),
+                      label: Text('Cancel'),
                     ),
                     SizedBox(width: 15),
-                    OutlinedButton(
-                      onPressed: () {
+                    OutlinedButtonWidget(
+                      onTap: () {
                         _confirmDelete(id);
                         if (!_isRemoving) {
                           Navigator.of(context).pop();
                         }
                       },
-                      child: Text('Conform'),
+                      label: Text('Conform'),
                     ),
                   ],
                 ),
@@ -86,10 +87,13 @@ class _SeeGroupMemberScreenState extends State<SeeGroupMemberScreen> {
         context: context,
         builder: (ctx) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             title: Text('Conform Delete'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Are tou sure want to remove this user($name) from your group.',
@@ -98,21 +102,21 @@ class _SeeGroupMemberScreenState extends State<SeeGroupMemberScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    TextButton(
-                      onPressed: () {
+                    TextButtonWidget(
+                      onTap: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text('Cancel'),
+                      label: Text('Cancel'),
                     ),
                     SizedBox(width: 15),
-                    OutlinedButton(
-                      onPressed: () {
+                    OutlinedButtonWidget(
+                      onTap: () {
                         _confirmDelete(id);
                         if (!_isRemoving) {
                           Navigator.of(context).pop();
                         }
                       },
-                      child: Text('Conform'),
+                      label: Text('Conform'),
                     ),
                   ],
                 ),
@@ -149,25 +153,17 @@ class _SeeGroupMemberScreenState extends State<SeeGroupMemberScreen> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.8,
+      height: MediaQuery.of(context).size.height * 0.7,
       child: Stack(
         children: [
           Positioned(
             right: 0,
             top: 0,
-            child: InkWell(
-              onTap: () {
+            child: IconButton(
+              onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  icon: Icon(Icons.close),
-                ),
-              ),
+              icon: Icon(Icons.close),
             ),
           ),
           SizedBox(height: 20),

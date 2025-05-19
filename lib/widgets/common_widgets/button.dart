@@ -6,6 +6,7 @@ class ElevatedButtonWidget extends StatelessWidget {
     required this.label,
     required this.onTap,
   });
+
   final Widget label;
   final void Function() onTap;
 
@@ -19,6 +20,7 @@ class ElevatedButtonWidget extends StatelessWidget {
           padding: EdgeInsets.symmetric(vertical: 4),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           backgroundColor: Color(0xFFEB50A8).withAlpha(200),
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
         ),
         child: label,
       ),
@@ -33,7 +35,13 @@ class TextButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextButton(onPressed: onTap, child: label);
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+      ),
+      child: label,
+    );
   }
 }
 
@@ -48,6 +56,13 @@ class OutlinedButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(onPressed: onTap, child: label);
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: Color(0xFFEB50A8)),
+        foregroundColor: Theme.of(context).colorScheme.onSurface,
+      ),
+      onPressed: onTap,
+      child: label,
+    );
   }
 }

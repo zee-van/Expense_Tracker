@@ -28,8 +28,30 @@ class _MonthlyExpensesFilterState extends ConsumerState<MonthlyExpensesFilter> {
 
   Future<void> loadAvailableYearsAndMonths() async {
     final dateMap = await getAvailableYearsAndMonths(widget.id);
+    final now = DateTime.now();
+    final currentYear = now.year;
+    final currentMonth = DateFormat('MMMM').format(now);
+
     setState(() {
       _availableYearsAndMonths = dateMap;
+
+      // Automatically select current year if available
+      if (_availableYearsAndMonths.containsKey(currentYear)) {
+        _selectedYear = currentYear.toString();
+
+        // Automatically select current month if it's in the list
+        if (_availableYearsAndMonths[currentYear]!.contains(currentMonth)) {
+          _selectedMonth = currentMonth;
+        } else {
+          // Select first available month if current isn't present
+          _selectedMonth = _availableYearsAndMonths[currentYear]!.first;
+        }
+      } else if (_availableYearsAndMonths.isNotEmpty) {
+        // Fallback: pick the most recent available year and its first month
+        final recentYear = _availableYearsAndMonths.keys.last;
+        _selectedYear = recentYear.toString();
+        _selectedMonth = _availableYearsAndMonths[recentYear]!.first;
+      }
     });
   }
 
@@ -228,13 +250,14 @@ class _MonthlyExpensesFilterState extends ConsumerState<MonthlyExpensesFilter> {
                         children: [
                           Container(
                             width: double.infinity,
-
                             padding: EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 24,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.green.shade50,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withAlpha(30),
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
@@ -248,9 +271,18 @@ class _MonthlyExpensesFilterState extends ConsumerState<MonthlyExpensesFilter> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'Total Expenses\n Rs.$totalExpenses',
+                                  'Total Expenses',
                                   style:
                                       Theme.of(context).textTheme.headlineLarge,
+                                ),
+                                Text(
+                                  'Rs. $totalExpenses',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.headlineLarge!.copyWith(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),
@@ -259,53 +291,56 @@ class _MonthlyExpensesFilterState extends ConsumerState<MonthlyExpensesFilter> {
                       ),
                       SizedBox(height: 10),
                       for (final myExpense in filteredExpenses)
-                        ListTile(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder:
-                                    (ctx) => ExpenseDetails(
-                                      expenseDetails: myExpense,
-                                    ),
-                              ),
-                            );
-                          },
-                          leading: CircleAvatar(
-                            child: Icon(
-                              categoryServices.getCategoryIcon(
-                                myExpense.data()['category'],
-                              ),
-                              color: categoryServices.getCategoryColor(
-                                myExpense.data()['category'],
+                        Container(
+                          margin: EdgeInsets.only(top: 5),
+                          child: ListTile(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder:
+                                      (ctx) => ExpenseDetails(
+                                        expenseDetails: myExpense,
+                                      ),
+                                ),
+                              );
+                            },
+                            leading: CircleAvatar(
+                              child: Icon(
+                                categoryServices.getCategoryIcon(
+                                  myExpense.data()['category'],
+                                ),
+                                color: categoryServices.getCategoryColor(
+                                  myExpense.data()['category'],
+                                ),
                               ),
                             ),
-                          ),
-                          title: Text(myExpense.data()['title']),
-                          subtitle: Text(
-                            myExpense.data()['description'],
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Rs.${myExpense.data()['amount']}',
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.bodyMedium!.copyWith(
-                                  color: Colors.red,
-                                  fontWeight: FontWeight.bold,
+                            title: Text(myExpense.data()['title']),
+                            subtitle: Text(
+                              myExpense.data()['description'],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Rs.${myExpense.data()['amount']}',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodyMedium!.copyWith(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                DateFormat('yyyy-MM-dd').format(
-                                  ((myExpense.data()['date']) as Timestamp)
-                                      .toDate(),
+                                Text(
+                                  DateFormat('yyyy-MM-dd').format(
+                                    ((myExpense.data()['date']) as Timestamp)
+                                        .toDate(),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       SizedBox(height: 70),

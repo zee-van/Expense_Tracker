@@ -18,6 +18,7 @@ class GroupExpenseListScreen extends StatefulWidget {
 
 class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
   final loggedUser = FirebaseAuth.instance.currentUser;
+  bool _isRemoving = false;
 
   void _showGroupsFeatures(String groupName, String adminId, String id) async {
     final adminDoc =
@@ -61,16 +62,9 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                         label: Row(
                           children: [
                             SizedBox(width: 20),
-                            Icon(
-                              Icons.group,
-                              size: 25,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                            Icon(Icons.group, size: 25),
                             SizedBox(width: 15),
-                            Text(
-                              'See Members',
-                              style: TextStyle(color: Colors.black),
-                            ),
+                            Text('See Members'),
                           ],
                         ),
                       ),
@@ -83,16 +77,9 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                         label: Row(
                           children: [
                             SizedBox(width: 20),
-                            Icon(
-                              Icons.person,
-                              size: 25,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                            Icon(Icons.person, size: 25),
                             SizedBox(width: 15),
-                            Text(
-                              'Add Members',
-                              style: TextStyle(color: Colors.black),
-                            ),
+                            Text('Add Members'),
                           ],
                         ),
                       ),
@@ -113,19 +100,28 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                         label: Row(
                           children: [
                             SizedBox(width: 20),
-                            Icon(
-                              Icons.settings,
-                              size: 25,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                            Icon(Icons.settings, size: 25),
                             SizedBox(width: 15),
-                            Text(
-                              'Settings',
-                              style: TextStyle(color: Colors.black),
-                            ),
+                            Text('Settings'),
                           ],
                         ),
                       ),
+                      if (adminId == loggedUser!.uid) SizedBox(height: 5),
+                      if (adminId == loggedUser!.uid)
+                        ElevatedButtonWidget(
+                          onTap: () {
+                            Navigator.of(context).pop();
+                            _deleteWholeExpenseGroup(id);
+                          },
+                          label: Row(
+                            children: [
+                              SizedBox(width: 20),
+                              Icon(Icons.delete, size: 25),
+                              SizedBox(width: 15),
+                              Text('Delete The Group'),
+                            ],
+                          ),
+                        ),
                       SizedBox(height: 30),
                     ],
                   ),
@@ -135,6 +131,84 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
           );
         },
       );
+    }
+  }
+
+  void _deleteWholeExpenseGroup(String id) async {
+    final groupName =
+        await FirebaseFirestore.instance.collection('groups').doc(id).get();
+    if (mounted) {
+      showDialog(
+        context: context,
+        builder: (ctx) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            title: Text('Conform Delete'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Are tou sure want to remove this (${groupName.data()!['groupName']}) group Expense Permanantly.',
+                ),
+                Text('It will delete all related expenses as well.'),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButtonWidget(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                      },
+                      label: Text('Cancel'),
+                    ),
+                    SizedBox(width: 15),
+                    OutlinedButtonWidget(
+                      onTap: () {
+                        _confirmDeleteGroupExpense(id);
+                        if (!_isRemoving) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      label: Text('Conform'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  void _confirmDeleteGroupExpense(String id) async {
+    try {
+      setState(() {
+        _isRemoving = true;
+      });
+      FirebaseFirestore.instance.collection('groups').doc(id).delete();
+      setState(() {
+        _isRemoving = false;
+      });
+      final batch = FirebaseFirestore.instance.batch();
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('groupExpenses')
+              .where('groupId', isEqualTo: id)
+              .get();
+      for (var doc in querySnapshot.docs) {
+        batch.delete(doc.reference);
+      }
+
+      await batch.commit();
+    } catch (e) {
+      setState(() {
+        _isRemoving = false;
+        Navigator.of(context).pop();
+      });
     }
   }
 
@@ -221,13 +295,13 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
               width: 350,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Color.fromARGB(233, 213, 112, 169),
-                borderRadius: BorderRadius.circular(15),
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 10,
-                    offset: Offset(0, 4),
+                    color: Theme.of(context).colorScheme.primary,
+                    blurRadius: 2,
+                    spreadRadius: 1,
                   ),
                 ],
               ),
@@ -246,12 +320,12 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                     style: TextStyle(fontSize: 16),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 40),
-                  ElevatedButton(
-                    onPressed: () {
+                  SizedBox(height: 30),
+                  ElevatedButtonWidget(
+                    onTap: () {
                       _createNewGroupExpense();
                     },
-                    child: Text('Create New Group Expense'),
+                    label: Text('Create New Group Expense'),
                   ),
                 ],
               ),
@@ -265,15 +339,17 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
               children: [
                 for (final group in groups)
                   Container(
-                    margin: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    width: double.infinity,
+                    margin: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding: const EdgeInsets.only(top: 6, bottom: 6, left: 12),
                     decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 6,
-                          offset: Offset(0, 3),
+                          color: Theme.of(context).colorScheme.primary,
+                          blurRadius: 2,
+                          spreadRadius: 1,
                         ),
                       ],
                     ),
@@ -288,7 +364,12 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                         );
                       },
                       contentPadding: EdgeInsets.only(top: 4),
-                      leading: CircleAvatar(child: Text(group['groupName'][0])),
+                      leading: CircleAvatar(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        child: Text(group['groupName'][0]),
+                      ),
                       title: Text(group['groupName']),
                       subtitle:
                           group['admin'] == loggedUser!.uid
@@ -320,7 +401,11 @@ class _GroupExpenseListScreenState extends State<GroupExpenseListScreen> {
                             group.id,
                           );
                         },
-                        child: Icon(Icons.more_vert),
+                        child: Icon(
+                          Icons.more_vert,
+                          size: 25,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
                       ),
                     ),
                   ),

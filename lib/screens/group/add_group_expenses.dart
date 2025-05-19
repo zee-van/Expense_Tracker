@@ -237,6 +237,7 @@ class _AddGroupExpensesScreenState
   @override
   Widget build(BuildContext context) {
     final categoryServices = ref.watch(categoryServiceProvider);
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
       appBar: AppBar(title: Text(widget.groupDetails['groupName'])),
       body: StreamBuilder(
@@ -278,16 +279,15 @@ class _AddGroupExpensesScreenState
           return ListView(
             children: [
               Container(
-                margin: EdgeInsets.all(10),
                 width: double.infinity,
-                padding: EdgeInsets.all(16.0),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 24),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
+                  color: Theme.of(context).colorScheme.primary.withAlpha(30),
+                  borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withAlpha(60),
-                      spreadRadius: 2,
-                      blurRadius: 5,
+                      color: Colors.black12,
+                      blurRadius: 6,
                       offset: Offset(0, 3),
                     ),
                   ],
@@ -317,19 +317,15 @@ class _AddGroupExpensesScreenState
                         children: [
                           Text(
                             'Total Expenses',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.green.shade900,
-                            ),
+                            style: Theme.of(context).textTheme.headlineLarge,
                           ),
-                          SizedBox(height: 6),
                           Text(
                             'Rs. $totalExpenses',
-                            style: TextStyle(
-                              fontSize: 28,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.headlineLarge!.copyWith(
+                              color: Colors.red,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green.shade800,
                             ),
                           ),
                         ],
@@ -353,7 +349,12 @@ class _AddGroupExpensesScreenState
                                 _isChart = !_isChart;
                               });
                             },
-                            child: Text('Chart'),
+                            child: Text(
+                              'Chart',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -380,7 +381,12 @@ class _AddGroupExpensesScreenState
                                 );
                               });
                             },
-                            child: Text('Filter'),
+                            child: Text(
+                              'Filter',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -422,7 +428,7 @@ class _AddGroupExpensesScreenState
                                           'Rs. $total',
                                           style: TextStyle(
                                             fontSize: 15,
-                                            color: Colors.green.shade700,
+                                            color: Colors.red,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
@@ -503,8 +509,15 @@ class _AddGroupExpensesScreenState
                         myExpense.data()['userId'] != loggedUser!.uid
                             ? LinearGradient(
                               colors: [
-                                Colors.red.withAlpha(20),
-                                Colors.red.withAlpha(80),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(30),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(40),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.primary.withAlpha(50),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -512,7 +525,15 @@ class _AddGroupExpensesScreenState
                             : LinearGradient(
                               colors: [
                                 Color(0xFFEB50A8).withAlpha(80),
-                                Color(0xFFEB50A8).withAlpha(20),
+                                Theme.of(
+                                  context,
+                                ).colorScheme.secondary.withAlpha(30),
+                                Color(0xFFEB50A8).withAlpha(80),
+
+                                Theme.of(
+                                  context,
+                                ).colorScheme.secondary.withAlpha(50),
+                                Color(0xFFEB50A8).withAlpha(80),
                               ],
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
@@ -573,6 +594,7 @@ class _AddGroupExpensesScreenState
                         SizedBox(width: 5),
                         myExpense.data()['userId'] != loggedUser!.uid
                             ? CircleAvatar(
+                              backgroundColor: colorScheme.primary,
                               child: FutureBuilder<String>(
                                 future: _getUserFirstNameCharacter(
                                   myExpense.data()['userId'],
@@ -587,7 +609,12 @@ class _AddGroupExpensesScreenState
                                   } else if (snapshot.hasError) {
                                     return Text('Error');
                                   } else if (snapshot.hasData) {
-                                    return Text(snapshot.data![0]);
+                                    return Text(
+                                      snapshot.data![0],
+                                      style: TextStyle(
+                                        color: colorScheme.onPrimary,
+                                      ),
+                                    );
                                   } else {
                                     return Text('');
                                   }
@@ -595,12 +622,15 @@ class _AddGroupExpensesScreenState
                               ),
                             )
                             : CircleAvatar(
-                              // backgroundColor: Color(0xFFEB50A8),
+                              backgroundColor: colorScheme.primary,
                               child: IconButton(
                                 onPressed: () {
                                   _showUpdateDeleteExpense(myExpense);
                                 },
-                                icon: Icon(Icons.more_vert),
+                                icon: Icon(
+                                  Icons.more_vert,
+                                  color: colorScheme.onPrimary,
+                                ),
                               ),
                             ),
                       ],

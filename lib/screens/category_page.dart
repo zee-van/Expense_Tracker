@@ -17,20 +17,24 @@ class _CategoryPageScreenState extends State<CategoryPageScreen> {
       child: ListView(
         children: [
           for (final category in expenseCategories)
-            ListTile(
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder:
-                        (ctx) =>
-                            ExpenseWithCategoryScreen(category: category.name),
-                  ),
-                );
-              },
-              leading: CircleAvatar(
-                child: Icon(category.icon, color: category.color),
+            Container(
+              margin: EdgeInsets.only(top: 5),
+              child: ListTile(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder:
+                          (ctx) => ExpenseWithCategoryScreen(
+                            category: category.name,
+                          ),
+                    ),
+                  );
+                },
+                leading: CircleAvatar(
+                  child: Icon(category.icon, color: category.color),
+                ),
+                title: Text(category.name),
               ),
-              title: Text(category.name),
             ),
         ],
       ),
